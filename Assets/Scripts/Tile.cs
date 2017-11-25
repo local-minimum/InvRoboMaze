@@ -7,7 +7,49 @@ public enum TileType { Sliding, Swapping, Stationary };
 public delegate void MoveEvent(Vector3 offset);
 public delegate void MoveStartEvent(int row, int col);
 public delegate void MoveEndEvent();
+public delegate void TileBusyStart(Tile tile);
+public delegate void TileBusyEnd(Tile tile);
 
+public struct Point
+{
+    public int x;
+    public int y;
+
+    public Point(int x, int y)
+    {
+        this.x = x;
+        this.y = y;
+    }
+
+    public int row
+    {
+        get
+        {
+            return y;
+        }
+    }
+
+    public int col
+    {
+        get
+        {
+            return x;
+        }
+    }
+
+    public Point Wrapped(int maxX, int maxY)
+    {
+        while (x < 0)
+        {
+            x += maxX;
+        }
+        while (y < 0)
+        {
+            y += maxY;
+        }
+        return new Point(x % maxX, y % maxY);
+    }
+}
 
 public class Tile : MonoBehaviour {
 
@@ -116,5 +158,41 @@ public class Tile : MonoBehaviour {
             return r.GetPoint(t);
         }
         throw new System.InvalidOperationException("Camera should look at board at all times");
+    }
+
+    public Point GetRelativePoint(int offsetCol, int offsetRow)
+    {
+        return new Point(col + offsetCol, row + offsetRow);
+    }
+
+    public event TileBusyStart OnTileBusyStart;
+    public event TileBusyEnd OnTileBusyEnd;
+
+    public void MoveTo(int row, int col, Vector3 target)
+    {
+        if (OnTileBusyStart != null)
+        {
+            OnTileBusyStart(this);
+        }
+        StartCoroutine(_Move(row, col, target));
+    }
+
+    IEnumerator<WaitForSeconds> _Move(int row, int col, Vector3 target)
+    {
+        Vector3 start = transform.position;
+        int steps = 15;
+        for (int i = 0; i < steps; i++)
+        {
+            transform.position = Vector3.Lerp(start, target, i / (steps - 1f));
+            yield return new WaitForSeconds(0.02f);
+        }
+        transform.position = target;
+
+        this.row = row;
+        this.col = col;
+        if (OnTileBusyEnd != null)
+        {
+            OnTileBusyEnd(this);
+        }
     }
 }

@@ -21,18 +21,17 @@ public class Board : MonoBehaviour {
             boardSize++;
             Debug.LogWarning("Increased board size because it must be odd");
         }
-        SetupTiles();
+        SetupMainTiles();
+        SetupStartTiles();
 	}
 
-	void SetupTiles()
+	void SetupMainTiles()
     {
-        int halfSize = (boardSize - 1) / 2;
-
         for (int row = 0; row < boardSize; row ++)
         {
             for (int col = 0; col < boardSize; col ++)
             {
-                Vector3 pos = new Vector3((row - halfSize) * tileSize, 0, (col - halfSize) * tileSize);
+                Vector3 pos = GetPosition(row, col);
                 Tile tile = Instantiate(_prefab, pos, Quaternion.identity, transform);
 
                 tile.Setup(
@@ -49,6 +48,35 @@ public class Board : MonoBehaviour {
         }
     }
 
+    Tile[] startTiles;
+
+    void SetupStartTiles()
+    {
+        startTiles = new Tile[players];
+        if (players == 2)
+        {
+            int row = (boardSize - 1) / 2;
+
+            Vector3 pos = GetPosition(row, -1);
+            startTiles[0] = Instantiate(_prefab, pos, Quaternion.identity, transform);
+            startTiles[0].Setup(TileType.Stationary, row, -1);
+
+            pos = GetPosition(row, boardSize);
+            startTiles[1] = Instantiate(_prefab, pos, Quaternion.identity, transform);
+            startTiles[1].Setup(TileType.Stationary, row, boardSize);
+        }
+        else
+        {
+            throw new System.NotImplementedException("Only supports 2 payers");
+        }
+    }
+
+    Vector3 GetPosition(int row, int col)
+    {
+        int halfSize = (boardSize - 1) / 2;
+        return new Vector3((row - halfSize) * tileSize, 0, (col - halfSize) * tileSize);
+    }
+
     bool sourceCanMove;
     int sourceRow;
     int sourceCol;
@@ -61,6 +89,8 @@ public class Board : MonoBehaviour {
     bool canSlideRow;
     bool canSlideCol;
     bool canSlide;
+    bool isSlidingRow;
+    bool isSlidingCol;
 
     private void Tile_onMoveStart(int row, int col)
     {
@@ -92,7 +122,29 @@ public class Board : MonoBehaviour {
 
     void SetNewTilePositions()
     {
- 
+        if (isSlidingCol)
+        {
+            int offset = this.moveOffset.x > 0 ? 1 : -1;
+            for (int idx = 0; idx < moveCol.Length; idx++)
+            {
+                Point pt = moveCol[idx]
+                    .GetRelativePoint(0, offset)
+                    .Wrapped(boardSize, boardSize);
+                Vector3 targetPos = GetPosition(pt.row, pt.col);
+                moveCol[idx].MoveTo(pt.row, pt.col, targetPos);
+            }
+        } else if (isSlidingRow)
+        {
+            int offset = this.moveOffset.x > 0 ? 1 : -1;
+            for (int idx = 0; idx < moveRow.Length; idx++)
+            {
+                Point pt = moveRow[idx]
+                    .GetRelativePoint(offset, 0)
+                    .Wrapped(boardSize, boardSize);
+                Vector3 targetPos = GetPosition(pt.row, pt.col);
+                moveRow[idx].MoveTo(pt.row, pt.col, targetPos);
+            }
+        }
     }
 
     void ClearMoveSource()
@@ -118,16 +170,20 @@ public class Board : MonoBehaviour {
         if (canSlide)
         {
             bool slideIsRow = Mathf.Abs(offset.x) < Mathf.Abs(offset.z);
+            isSlidingCol = false;
+            isSlidingRow = false;
 
             if (slideIsRow && canSlideRow && Mathf.Abs(offset.z) > noSlideThreshold * tileSize)
             {
                 Sliding(moveRow);
                 ResetSliding(moveCol);
+                isSlidingRow = true;
             }
             else if (!slideIsRow && canSlideCol && Mathf.Abs(offset.x) > noSlideThreshold * tileSize)
             {
                 Sliding(moveCol);
                 ResetSliding(moveRow);
+                isSlidingCol = true;
             }
         }
     }

@@ -4,14 +4,7 @@ using UnityEngine;
 
 public class Player : MonoBehaviour {
 
-    [SerializeField]
-    Color color;
-
-	void Start () {
-        SetColor();
-	}
-	
-    void SetColor()
+    public void SetColor(Color color)
     {
         foreach(MeshRenderer rend in GetComponentsInChildren<MeshRenderer>())
         {

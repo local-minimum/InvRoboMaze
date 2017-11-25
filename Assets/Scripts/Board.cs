@@ -4,12 +4,18 @@ using UnityEngine;
 
 public class Board : MonoBehaviour {
 
-    public int players = 2;
+    public int nPlayers = 2;
+
+    [SerializeField]
+    Color[] playerColors;
 
     public int boardSize = 7;
 
     [SerializeField]
-    Tile _prefab;
+    Tile _tilePrefab;
+
+    [SerializeField]
+    Player _playerPrefab;
 
     public float tileSize = 1.05f;
 
@@ -32,7 +38,7 @@ public class Board : MonoBehaviour {
             for (int col = 0; col < boardSize; col ++)
             {
                 Vector3 pos = GetPosition(row, col);
-                Tile tile = Instantiate(_prefab, pos, Quaternion.identity, transform);
+                Tile tile = Instantiate(_tilePrefab, pos, Quaternion.identity, transform);
 
                 tile.Setup(
                     (row % 2) == 1 && (col % 2) == 1 ? TileType.Swapping : TileType.Sliding,
@@ -49,21 +55,36 @@ public class Board : MonoBehaviour {
     }
 
     Tile[] startTiles;
+    Player[] players;
 
     void SetupStartTiles()
     {
-        startTiles = new Tile[players];
-        if (players == 2)
+        startTiles = new Tile[nPlayers];
+        players = new Player[nPlayers];
+
+        if (nPlayers == 2)
         {
             int row = (boardSize - 1) / 2;
 
             Vector3 pos = GetPosition(row, -1);
-            startTiles[0] = Instantiate(_prefab, pos, Quaternion.identity, transform);
+            startTiles[0] = Instantiate(_tilePrefab, pos, Quaternion.identity, transform);
             startTiles[0].Setup(TileType.Stationary, row, -1);
 
+            players[0] = Instantiate(_playerPrefab, startTiles[0].transform, true);
+            players[0].SetColor(playerColors[0]);
+            Vector3 playerForward = GetTile(row, 0).transform.position - startTiles[0].transform.position;
+            players[0].transform.rotation = Quaternion.LookRotation(playerForward, Vector3.up);
+            players[0].transform.localPosition = Vector3.zero;
+
             pos = GetPosition(row, boardSize);
-            startTiles[1] = Instantiate(_prefab, pos, Quaternion.identity, transform);
+            startTiles[1] = Instantiate(_tilePrefab, pos, Quaternion.identity, transform);
             startTiles[1].Setup(TileType.Stationary, row, boardSize);
+
+            players[1] = Instantiate(_playerPrefab, startTiles[1].transform, true);
+            players[1].SetColor(playerColors[1]);
+            playerForward = GetTile(row, boardSize - 1).transform.position - startTiles[1].transform.position;
+            players[1].transform.rotation = Quaternion.LookRotation(playerForward, Vector3.up);
+            players[1].transform.localPosition = Vector3.zero;
         }
         else
         {

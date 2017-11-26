@@ -49,6 +49,16 @@ public struct Point
         }
         return new Point(x % maxX, y % maxY);
     }
+
+    public static Point operator -(Point a, Point b)
+    {
+        return new Point(b.x - a.x, b.y - a.y);
+    }
+
+    public static Point operator +(Point a, Point b)
+    {
+        return new Point(b.x + a.x, b.y + a.y);
+    }
 }
 
 public class Tile : MonoBehaviour {
@@ -163,6 +173,11 @@ public class Tile : MonoBehaviour {
     public Point GetRelativePoint(int offsetCol, int offsetRow)
     {
         return new Point(col + offsetCol, row + offsetRow);
+    }
+
+    public Point AsPoint()
+    {
+        return new Point(col, row);
     }
 
     public event TileBusyStart OnTileBusyStart;

@@ -231,9 +231,21 @@ public class Board : MonoBehaviour {
         }
     }
 
+    public Tile GetTile(Point pt)
+    {
+        return GetTile(pt.row, pt.col);
+    }
+
     public Tile GetTile(int row, int col)
     {
         foreach(Tile t in tiles)
+        {
+            if (t.hasPosition(row, col))
+            {
+                return t;
+            }
+        }
+        foreach(Tile t in startTiles)
         {
             if (t.hasPosition(row, col))
             {

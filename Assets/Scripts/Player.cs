@@ -42,8 +42,20 @@ public class Player : MonoBehaviour {
     public void Move()
     {
         Tile next = board.GetTile(current.AsPoint() + lookDirection);
-        Position(next);        
-                
+        Debug.Log(
+            string.Format(
+                "Move [{0}], {1}->{2} ({4}) looking {3}",
+                name,
+                current,
+                next,
+                lookDirection.ToRowColString(),
+                (current.AsPoint() + lookDirection).ToRowColString()
+        ));
+
+        if (next)
+        {
+            Position(next);
+        }                
     }
 
     public void ActOnPlayer()
@@ -54,8 +66,8 @@ public class Player : MonoBehaviour {
         }
     }
 
-    public Point GetLookDirection(Tile from, Tile next)
+    public Point GetLookDirection(Tile from, Tile to)
     {
-        return next.AsPoint() - from.AsPoint();
+        return to.AsPoint() - from.AsPoint();
     }
 }

@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Board : MonoBehaviour {
 
-    public int nPlayers = 2;
+    public Match match;
 
     [SerializeField]
     Color[] playerColors;
@@ -55,14 +55,14 @@ public class Board : MonoBehaviour {
     }
 
     Tile[] startTiles;
-    Player[] players;
+
 
     void SetupStartTiles()
     {
-        startTiles = new Tile[nPlayers];
-        players = new Player[nPlayers];
+        startTiles = new Tile[match.nPlayers];
+        Player[] players = new Player[match.nPlayers];
 
-        if (nPlayers == 2)
+        if (match.nPlayers == 2)
         {
             int row = (boardSize - 1) / 2;
 
@@ -74,6 +74,7 @@ public class Board : MonoBehaviour {
             players[0].SetColor(playerColors[0]);            
             players[0].Position(startTiles[0]);
             players[0].LookTowards(GetTile(row, 0));
+            players[0].name = "Player 1";
 
             pos = GetPosition(row, boardSize);
             startTiles[1] = Instantiate(_tilePrefab, pos, Quaternion.identity, transform);
@@ -83,11 +84,14 @@ public class Board : MonoBehaviour {
             players[1].SetColor(playerColors[1]);
             players[1].Position(startTiles[1]);
             players[1].LookTowards(GetTile(row, boardSize - 1));
+            players[1].name = "Player 2";
         }
         else
         {
             throw new System.NotImplementedException("Only supports 2 payers");
         }
+
+        match.SetPlayers(players);
     }
 
     Vector3 GetPosition(int row, int col)

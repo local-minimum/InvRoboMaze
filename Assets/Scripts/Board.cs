@@ -71,10 +71,9 @@ public class Board : MonoBehaviour {
             startTiles[0].Setup(TileType.Stationary, row, -1);
 
             players[0] = Instantiate(_playerPrefab, startTiles[0].transform, true);
-            players[0].SetColor(playerColors[0]);
-            Vector3 playerForward = GetTile(row, 0).transform.position - startTiles[0].transform.position;
-            players[0].transform.rotation = Quaternion.LookRotation(playerForward, Vector3.up);
-            players[0].transform.localPosition = Vector3.zero;
+            players[0].SetColor(playerColors[0]);            
+            players[0].Position(startTiles[0]);
+            players[0].LookTowards(GetTile(row, 0));
 
             pos = GetPosition(row, boardSize);
             startTiles[1] = Instantiate(_tilePrefab, pos, Quaternion.identity, transform);
@@ -82,9 +81,8 @@ public class Board : MonoBehaviour {
 
             players[1] = Instantiate(_playerPrefab, startTiles[1].transform, true);
             players[1].SetColor(playerColors[1]);
-            playerForward = GetTile(row, boardSize - 1).transform.position - startTiles[1].transform.position;
-            players[1].transform.rotation = Quaternion.LookRotation(playerForward, Vector3.up);
-            players[1].transform.localPosition = Vector3.zero;
+            players[1].Position(startTiles[1]);
+            players[1].LookTowards(GetTile(row, boardSize - 1));
         }
         else
         {

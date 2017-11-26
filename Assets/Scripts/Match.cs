@@ -92,8 +92,18 @@ public class Match : MonoBehaviour {
         
     }
 
+    bool playerMoves = false;
+
     public void MovePlayers()
     {
+        if (!playerMoves)
+        {
+            StartCoroutine(_MovePlayers());
+        }
+    }
+
+    IEnumerator<WaitForSeconds> _MovePlayers() {
+        playerMoves = true;
         while (true)
         {
             bool anyMove = false;
@@ -105,14 +115,15 @@ public class Match : MonoBehaviour {
                 }
 
                 players[player].Move();
-
                 anyMove = true;
                 actionPoints[player]--;
+                yield return new WaitForSeconds(0.5f);
             }
             if (!anyMove)
             {
                 break;
             }
         }
+        playerMoves = false;
     }
 }

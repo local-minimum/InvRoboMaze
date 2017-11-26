@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 class PlayerOrder : IEnumerable<int>
 {
@@ -66,6 +67,8 @@ public class Match : MonoBehaviour {
     public int nPlayers = 2;
 
     public int[] actionPoints;
+    public int[] requiredBoardMoves;
+
     PlayerOrder playerOrder;
     Player[] players;
 
@@ -75,6 +78,7 @@ public class Match : MonoBehaviour {
         playerOrder.Shuffle();
 
         actionPoints = new int[nPlayers];
+        requiredBoardMoves = new int[nPlayers];
         RefillActionPoints();
     }
 
@@ -90,6 +94,16 @@ public class Match : MonoBehaviour {
             actionPoints[i] = actionPointsPerPlayer;
         }
         
+    }
+
+    public void SetRequiredMoves(UIPlayerButton btn)
+    {
+        float costPerMove = 2.0f;
+        int playerId = btn.PlayerId;
+        int maxMoves = Mathf.FloorToInt(actionPoints[playerId] / costPerMove);
+        requiredBoardMoves[playerId] = UnityEngine.Random.Range(1, maxMoves);
+        actionPoints[playerId] -= Mathf.RoundToInt(requiredBoardMoves[playerId] * costPerMove);
+        btn.SetRollResults(requiredBoardMoves[playerId], actionPoints[playerId]);
     }
 
     bool playerMoves = false;
@@ -126,4 +140,5 @@ public class Match : MonoBehaviour {
         }
         playerMoves = false;
     }
+
 }
